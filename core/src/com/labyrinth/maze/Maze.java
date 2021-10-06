@@ -1,34 +1,21 @@
 package com.labyrinth.maze;
 
-public class Maze extends MazeGenerator {
+public class Maze  {
 
-	public Maze() {
+	
+	
 
-	}
+//	public Boolean outsideMazeLimits(Integer x, Integer y) {
+//		return x < 0 || y < 0 || x > getCoordinates().getX() - 1 || y > getCoordinates().getY() - 1;
+//	}
 
-	public Maze(Coordinates coordinates) {
-		super(coordinates);
-	}
-
-	public int[][] getMaze() {
-		return maze;
-	}
-
-	public Coordinates getCoordinates() {
-		return this.coordinates;
-	}
-
-	public Boolean outsideMazeLimits(Integer x, Integer y) {
-		return x < 0 || y < 0 || x > getCoordinates().getX() - 1 || y > getCoordinates().getY() - 1;
-	}
-
-	public Boolean hasFloorAt(Integer x, Integer y) {
-		return (maze[x][y] & 1) == 0;
-	}
-
-	public Boolean hasWallAt(Integer x, Integer y) {
-		return (maze[x][y] & 8) == 0;
-	}
+//	public Boolean hasFloorAt(Integer x, Integer y) {
+//		return (maze[x][y] & 1) == 0;
+//	}
+//
+//	public Boolean hasWallAt(Integer x, Integer y) {
+//		return (maze[x][y] & 8) == 0;
+//	}
 
 //	public void display(Character... characters) {
 //
