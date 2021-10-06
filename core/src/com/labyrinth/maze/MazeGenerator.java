@@ -59,7 +59,7 @@ public class MazeGenerator {
 		return (v >= 0) && (v < upper);
 	}
  
-	private enum DIR {
+	public enum DIR {
 		N(1, 0, -1), S(2, 0, 1), E(4, 1, 0), W(8, -1, 0);
 		private final int bit;
 		private final int dx;

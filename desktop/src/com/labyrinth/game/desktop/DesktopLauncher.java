@@ -11,6 +11,7 @@ public class DesktopLauncher {
 		config.title = "Labyrinth";
 		config.width = 800;
 		config.height = 400;
+	    config.resizable = false;
 		
 		new LwjglApplication(new LabyrinthGame(), config);
 	}
