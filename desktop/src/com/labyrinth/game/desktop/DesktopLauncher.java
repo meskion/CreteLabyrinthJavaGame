@@ -2,7 +2,7 @@ package com.labyrinth.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.labyrinth.game.LabyrinthGame;
+import com.labyrinth.game.mainGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -13,6 +13,6 @@ public class DesktopLauncher {
 		config.height = 400;
 	    config.resizable = false;
 		
-		new LwjglApplication(new LabyrinthGame(), config);
+		new LwjglApplication(new mainGame(), config);
 	}
 }
