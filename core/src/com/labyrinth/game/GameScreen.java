@@ -185,25 +185,40 @@ public class GameScreen implements Screen {
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
 			nextX += 300 * Gdx.graphics.getDeltaTime();
 
-		Rectangle collider = checkCollision(teseo, walls, nextX, nextY);
-		Rectangle hCollider = checkHCollision(nextX);
-		Rectangle vCollider = checkVCollision(nextY);
-
-		if (collider != null) {
-			if (hCollider == null) {
-				teseo.x += nextX;
-			} else if (vCollider == null) {
-				teseo.y += nextY;
-			}
-
-		} else {
-			teseo.x += nextX;
-			teseo.y += nextY;
-		}
+		moveTeseo(nextX, nextY);
 
 		camera.position.set(teseo.x, teseo.y, 0);
 
 	}
+	
+	private void moveTeseo(float nextX, float nextY) {
+		moveHor(nextX);
+		moveVer(nextY);
+	}
+
+	public void moveHor(float nextX){
+		Rectangle hCollider = checkHCollision(nextX);
+		
+		if (hCollider == null) {
+			teseo.x += nextX;
+		} else if (checkHCollision(nextX/nextX*Gdx.graphics.getDeltaTime()) == null){
+			moveHor(nextX/5);
+		}
+		
+	}
+	
+	public void moveVer( float nextY){
+		
+		Rectangle vCollider = checkVCollision(nextY);
+		
+		 if (vCollider == null) {
+				teseo.y += nextY;
+			}else if (checkVCollision(nextY/nextY*Gdx.graphics.getDeltaTime()) == null){
+				moveVer(nextY/5);
+			}
+	}
+	
+	
 
 	@Override
 	public void resize(int width, int height) {
