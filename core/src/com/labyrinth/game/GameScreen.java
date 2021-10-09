@@ -24,8 +24,8 @@ public class GameScreen implements Screen {
 	private Sound footsteps;
 	private Rectangle teseo;
 	private List<Rectangle> walls;
-	private int x = 30;
-	private int y = 30;
+	private int x = 45;
+	private int y = 45;
 	public static int step = 128;
 
 	public GameScreen(final Game game) {
