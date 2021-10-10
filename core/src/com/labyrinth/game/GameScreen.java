@@ -13,6 +13,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.labyrinth.maze.MazeGenerator;
 
@@ -24,15 +31,25 @@ public class GameScreen implements Screen {
 	private Sound footsteps;
 	private Rectangle teseo;
 	private List<Rectangle> walls;
-	private int x = 45;
-	private int y = 45;
+	private int x;
+	private int y;
+	private Stage stage;
+	private SwapImage arrowUp, arrowDown, arrowLeft, arrowRight;
+	public String playerName;
 	public static int step = 128;
 
-	public GameScreen(final Game game) {
+	public GameScreen(final Game game, String name, int difficulty) {
+
 		this.game = game;
+		x = difficulty;
+		y = difficulty;
+		playerName = name;
+
 		camera = new OrthographicCamera();
 		batch = new SpriteBatch();
 		camera.setToOrtho(false, 800 * 2, 400 * 2);
+
+		stageSetup();
 
 		teseoSprite = new Texture(Gdx.files.internal("sprites/teseo.png"));
 		wallSprite = new Texture(Gdx.files.internal("sprites/wall.png"));
@@ -45,6 +62,50 @@ public class GameScreen implements Screen {
 		teseo.y = -y / 2 * step;
 		teseo.width = 48;
 		teseo.height = 48;
+	}
+
+	private void stageSetup() {
+		stage = new Stage();
+		Gdx.input.setInputProcessor(stage);
+		Table arrows = new Table();
+		
+		arrows.setPosition(755, 35);
+		arrows.align(Align.bottomRight);
+		stage.addActor(arrows);
+
+		arrowUp = setArrow("up");
+		arrowDown = setArrow("down");
+		arrowLeft = setArrow("left");
+		arrowRight = setArrow("right");
+		int aSize = 75;
+		int pad = -10;
+		
+		arrows.add();
+		arrows.add(arrowUp).pad(pad).width(aSize).height(aSize);
+		arrows.add();
+
+		arrows.row();
+
+		arrows.add(arrowLeft).pad(pad).width(aSize).height(aSize);
+		arrows.add();
+		arrows.add(arrowRight).pad(pad).width(aSize).height(aSize);
+
+		arrows.row();
+
+		arrows.add();
+		arrows.add(arrowDown).pad(pad).width(aSize).height(aSize);
+		arrows.add();
+	}
+
+	private SwapImage setArrow(String name) {
+		Texture sprite = new Texture(Gdx.files.internal("sprites/" + name + "Arrow.png"));
+		Texture actSprite = new Texture(Gdx.files.internal("sprites/" + name + "ArrowActive.png"));
+		
+		SwapImage arrow = new SwapImage(sprite, actSprite);
+
+		
+		
+		return arrow;
 	}
 
 	public static Rectangle checkCollision(Rectangle teseo, List<Rectangle> walls, float x, float y) {
@@ -175,54 +236,74 @@ public class GameScreen implements Screen {
 		float nextX = 0;
 		float nextY = 0;
 
-		if (Gdx.input.isKeyPressed(Input.Keys.UP))
-//			teseo.y += 200 * Gdx.graphics.getDeltaTime();
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			nextY += 300 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+			arrowUp.setCurrent(1);
+		}else {
+			arrowUp.setCurrent(0);
+		}
+		
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			nextY -= 300 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+			arrowDown.setCurrent(1);
+		}else {
+			arrowDown.setCurrent(0);
+		}
+			
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			nextX -= 300 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+			arrowLeft.setCurrent(1);
+		}else {
+			arrowLeft.setCurrent(0);
+		}
+			
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			nextX += 300 * Gdx.graphics.getDeltaTime();
+			arrowRight.setCurrent(1);
+		}else {
+			arrowRight.setCurrent(0);
+		}
+			
 
 		moveTeseo(nextX, nextY);
 
 		camera.position.set(teseo.x, teseo.y, 0);
 
+		stage.act(Gdx.graphics.getDeltaTime());
+		stage.draw();
+
 	}
-	
+
 	private void moveTeseo(float nextX, float nextY) {
 		moveHor(nextX);
 		moveVer(nextY);
 	}
 
-	public void moveHor(float nextX){
+	public void moveHor(float nextX) {
 		Rectangle hCollider = checkHCollision(nextX);
-		
+
 		if (hCollider == null) {
 			teseo.x += nextX;
-		} else if (checkHCollision(nextX/nextX*Gdx.graphics.getDeltaTime()) == null){
-			moveHor(nextX/5);
+		} else if (checkHCollision(nextX / nextX * Gdx.graphics.getDeltaTime()) == null) {
+			moveHor(nextX / 5);
 		}
-		
+
 	}
-	
-	public void moveVer( float nextY){
-		
+
+	public void moveVer(float nextY) {
+
 		Rectangle vCollider = checkVCollision(nextY);
-		
-		 if (vCollider == null) {
-				teseo.y += nextY;
-			}else if (checkVCollision(nextY/nextY*Gdx.graphics.getDeltaTime()) == null){
-				moveVer(nextY/5);
-			}
+
+		if (vCollider == null) {
+			teseo.y += nextY;
+		} else if (checkVCollision(nextY / nextY * Gdx.graphics.getDeltaTime()) == null) {
+			moveVer(nextY / 5);
+		}
 	}
-	
-	
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
+		stage.getViewport().update(width, height, true);
 
 	}
 

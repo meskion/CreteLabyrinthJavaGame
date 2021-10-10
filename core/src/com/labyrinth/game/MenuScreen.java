@@ -17,7 +17,9 @@ public class MenuScreen implements Screen {
 
 	final int width = 800;
 	final int height = 400;
-
+	final int step = 128;
+	final int mazeSize = 40;
+	protected Map<Integer, Vector2> dictMenu;
 	Texture wallSprite;
 
 	final mainGame game;
@@ -29,10 +31,10 @@ public class MenuScreen implements Screen {
 		this.game = game;
 		wallSprite = new Texture(Gdx.files.internal("sprites/wall.png"));
 
-		GameScreen.generateLevel(walls, 40, 40, GameScreen.step);
+		GameScreen.generateLevel(walls, mazeSize, mazeSize, GameScreen.step);
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, width * 3, height * 3);
-		camera.position.set(20 * 128, -20 * 128, 0);
+		camera.position.set(20 * step, -20 * step, 0);
 
 	}
 
