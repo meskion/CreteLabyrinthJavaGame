@@ -23,12 +23,7 @@ public class NewGameScreen extends MenuScreen {
 	private Table table, left, right;
 	private ButtonGroup<TextButton> radioButtons;
 	private TextButton easy, medium, hard;
-	private Skin skin;
-	private BitmapFont font;
 	private Texture menuBkg, cursorSprite;
-	private TextButtonStyle bStyle;
-	private TextFieldStyle tStyle;
-	private LabelStyle lStyle;
 	private Label namelabel;
 	private TextField name;
 	private AbsCursor cursor;
@@ -39,32 +34,28 @@ public class NewGameScreen extends MenuScreen {
 		this.game = game;
 		stage = new Stage();
 		menuBkg = new Texture(Gdx.files.internal("sprites/blankMenu.jpg"));
-		skin = new Skin(Gdx.files.internal("data/pixthulhu-ui.json"));
-		font = new BitmapFont(Gdx.files.internal("data/bgregular.fnt"));
 		cursorSprite = new Texture(Gdx.files.internal("sprites/menuArrow.png"));
 
 		Gdx.input.setInputProcessor(stage);
 		table = new Table();
 		left = new Table();
 		right = new Table();
-		defineStyles();
+		
 
 		// table.setFillParent(true);
 
 		stage.addActor(table);
-		easy = new TextButton("facil", bStyle);
-		medium = new TextButton("medio", bStyle);
-		medium.setChecked(true);
-		hard = new TextButton("dificil", bStyle);
-		radioButtons = new ButtonGroup<TextButton>(easy, medium, hard);
-		radioButtons.setMinCheckCount(1);
-		radioButtons.setMaxCheckCount(1);
+		easy = new TextButton("facil", game.bStyle);
+		medium = new TextButton("medio", game.bStyle);
+		hard = new TextButton("dificil", game.bStyle);
+		
 
-		namelabel = new Label("Escribe tu nombre", lStyle);
+		namelabel = new Label("Escribe tu nombre", game.lStyle);
 //		namelabel.setColor( 0.9f,  0.7f,  0.63f,  1f);
 //		namelabel.setPosition(100, 200);
-		name = new TextField("", tStyle);
+		name = new TextField("", game.tStyle);
 		name.setColor(0.9f, 0.8f, 0.73f, 1f);
+		name.setText("Teseo");
 
 		table.setPosition(400, 180);
 		table.add(left, right);
@@ -100,17 +91,7 @@ public class NewGameScreen extends MenuScreen {
 
 	}
 
-	private void defineStyles() {
-		Color niceGreen = new Color(0.33f, 0.4f, 0.14f, 1f);
-		tStyle = skin.get("default", TextFieldStyle.class);
-		bStyle = new TextButtonStyle();
-		lStyle = new LabelStyle();
-		lStyle.fontColor = niceGreen;
-		bStyle.fontColor = niceGreen;
-		tStyle.font = font;
-		bStyle.font = font;
-		lStyle.font = font;
-	}
+	
 
 	@Override
 	public void show() {
@@ -136,6 +117,8 @@ public class NewGameScreen extends MenuScreen {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
 			cursor.act();
 			game.setScreen(new GameScreen(game, name.getText(), difficulty));
+			optionSelect.play();
+			game.menuMusic.stop();
 		}
 	}
 

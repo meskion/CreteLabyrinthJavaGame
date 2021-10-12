@@ -1,22 +1,27 @@
 package com.labyrinth.game;
 
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class MainMenuScreen extends MenuScreen {
 
 	Texture menuSprite, cursorSprite;
+	boolean fileExists;
 
 	AbsCursor cursor;
 
 	public MainMenuScreen(mainGame game) {
 		super(game);
-		menuSprite = new Texture(Gdx.files.internal("sprites/menu.jpg"));
+		fileExists = !Files.notExists(Path.of("data/maze.sav"));
+		
+		
+		menuSprite = (fileExists) ? new Texture(Gdx.files.internal("sprites/menu.jpg")) : new Texture(Gdx.files.internal("sprites/menu2.jpg"));
+		
 		cursorSprite = new Texture(Gdx.files.internal("sprites/menuArrow.png"));
 
 		cursor = new AbsCursor(new Vector2(20 * 128 - 280, -20 * 128 + 20),
@@ -27,22 +32,33 @@ public class MainMenuScreen extends MenuScreen {
 				switch (this.menuCursor) {
 				case 0:
 					game.setScreen(new NewGameScreen(game));
+					optionSelect.play();
 					dispose();
 					break;
 				case 1:
-					game.setScreen(new GameScreen(game, "test,", 30));
-					dispose();
+					if (fileExists) {
+						game.setScreen(new GameScreen(game));
+						optionSelect.play();
+						dispose();
+					}
 					break;
 				case 2:
-					// exit;
+					dispose();
+					Gdx.app.exit();
 				default:
 					break;
 				}
+				
 
 			}
 		};
 
+		game.menuMusic.play();
+		game.menuMusic.setVolume(0.3f);
+
 	}
+
+	
 
 	@Override
 	public void render(float delta) {

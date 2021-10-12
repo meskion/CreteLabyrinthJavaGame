@@ -7,6 +7,7 @@ import java.util.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
@@ -21,7 +22,7 @@ public class MenuScreen implements Screen {
 	final int mazeSize = 40;
 	protected Map<Integer, Vector2> dictMenu;
 	Texture wallSprite;
-
+	Sound  optionSelect;
 	final mainGame game;
 	List<Rectangle> walls = new ArrayList<>();
 
@@ -31,10 +32,12 @@ public class MenuScreen implements Screen {
 		this.game = game;
 		wallSprite = new Texture(Gdx.files.internal("sprites/wall.png"));
 
-		GameScreen.generateLevel(walls, mazeSize, mazeSize, GameScreen.step);
+		GameScreen.generateLevel(walls, mazeSize, GameScreen.step);
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, width * 3, height * 3);
 		camera.position.set(20 * step, -20 * step, 0);
+		
+		optionSelect = Gdx.audio.newSound(Gdx.files.internal("sounds/Accept.mp3"));
 
 	}
 
