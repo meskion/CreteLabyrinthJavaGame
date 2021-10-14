@@ -2,7 +2,6 @@ package com.labyrinth.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -20,14 +19,14 @@ public class WinScreen extends MenuScreen {
 	private TextButton volver, salir;
 	private Label namelabel;
 	private AbsCursor cursor;
-	private Music victoryMusicA, victoryMusicB;
+//	private Music victoryMusicA, victoryMusicB;
 	private TextButton otraVez;
 
 	public WinScreen(mainGame game, String name) {
 		super(game);
 		stage = new Stage();
-		victoryMusicA = Gdx.audio.newMusic(Gdx.files.internal("sounds/victoryA.wav"));
-		victoryMusicB = Gdx.audio.newMusic(Gdx.files.internal("sounds/victoryB.wav"));
+//		victoryMusicA = Gdx.audio.newMusic(Gdx.files.internal("sounds/victoryA.wav"));
+//		victoryMusicB = Gdx.audio.newMusic(Gdx.files.internal("sounds/victoryB.wav"));
 		menuBkg = new Texture(Gdx.files.internal("sprites/blankMenu.jpg"));
 		Gdx.input.setInputProcessor(stage);
 		cursorSprite = new Texture(Gdx.files.internal("sprites/menuArrow.png"));
@@ -77,9 +76,8 @@ public class WinScreen extends MenuScreen {
 
 			}
 		};
-		victoryMusicA.setLooping(false);
-		victoryMusicA.play();
-
+		
+		
 	}
 
 	@Override
@@ -94,10 +92,10 @@ public class WinScreen extends MenuScreen {
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
 		cursor.update();
-		if (!victoryMusicA.isPlaying()) {
-			victoryMusicB.setLooping(true);
-			victoryMusicB.play();
-		}
+		game.victoryMusicA.play();
+		if (!game.victoryMusicA.isPlaying())
+			game.victoryMusicB.play();
+
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
 			cursor.act();
 
@@ -107,8 +105,9 @@ public class WinScreen extends MenuScreen {
 	@Override
 	public void dispose() {
 		super.dispose();
-		victoryMusicA.dispose();
-		victoryMusicB.dispose();
+		game.victoryMusicA.stop();
+		game.victoryMusicB.stop();
+	
 		menuBkg.dispose();
 		cursorSprite.dispose();
 	}

@@ -44,6 +44,8 @@ project(":desktop") {
 
     dependencies {
         implementation project(":core")
+        // https://mvnrepository.com/artifact/javax.validation/validation-api
+		implementation 'javax.validation:validation-api:2.0.1.Final'
         api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"

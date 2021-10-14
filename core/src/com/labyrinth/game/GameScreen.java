@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -29,33 +28,44 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.labyrinth.maze.MazeGenerator;
 
 public class GameScreen implements Screen {
+
 	private mainGame game;
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
-	private Texture teseoSprite, wallSprite, menuSprite;
+	// Atributos del menu
+	private Image menuImg;
+	private Table menu;
+	private Stage stage;
+	private SwapImage arrowUp, arrowDown, arrowLeft, arrowRight;
+	// Cursor
+	private AbsCursor cursor;
+
+	// Atributos de recuros
+	private Texture teseoSprite, wallSprite, menuSprite, cursorSprite;
 	private Sound[] footsteps = new Sound[9];
 	private Sound roar;
+
+	// elementos del juego
 	private Rectangle teseo;
 	private List<Rectangle> walls;
 	private Rectangle exit;
 	private int difficulty;
 
-	private Image menuImg;
-	private Table menu;
-	private Stage stage;
-	private SwapImage arrowUp, arrowDown, arrowLeft, arrowRight;
 	public String playerName;
-	private AbsCursor cursor;
 	private boolean paused = false;
-	private Texture cursorSprite;
 	private boolean notWalking = true;
 	private float numroars;
-	public static int step = 128;
+	public static final int step = 128;
 
+	/**
+	 * Constructor llamado para una partida nueva.
+	 * 
+	 * @param game
+	 * @param name
+	 * @param difficulty
+	 */
 	public GameScreen(final mainGame game, String name, int difficulty) {
 		gameSetup(game);
-
-	
 
 		this.difficulty = difficulty;
 
@@ -66,12 +76,22 @@ public class GameScreen implements Screen {
 		teseo.y = -difficulty / 2 * step;
 	}
 
+	/**
+	 * Constructor llamado para continuar una partida guardada.
+	 * 
+	 * @param game
+	 */
 	public GameScreen(final mainGame game) {
 		gameSetup(game);
 		load();
 
 	}
 
+	/**
+	 * Inicializa todos los recursos y atributos del juego
+	 * 
+	 * @param game
+	 */
 	private void gameSetup(final mainGame game) {
 		this.game = game;
 		camera = new OrthographicCamera();
@@ -82,6 +102,7 @@ public class GameScreen implements Screen {
 		wallSprite = new Texture(Gdx.files.internal("sprites/wall.png"));
 		menuSprite = new Texture(Gdx.files.internal("sprites/blankMenu.jpg"));
 		cursorSprite = new Texture(Gdx.files.internal("sprites/menuArrow.png"));
+
 		loadSteps();
 		roar = Gdx.audio.newSound(Gdx.files.internal("sounds/troll-roars.ogg"));
 		walls = new ArrayList<>();
@@ -98,8 +119,9 @@ public class GameScreen implements Screen {
 					toggleMenu();
 					break;
 				case 1:
-					game.setScreen(new GameScreen(game, playerName, difficulty));
 					dispose();
+					game.setScreen(new GameScreen(game, playerName, difficulty));
+
 					break;
 				case 2:
 					save();
@@ -123,39 +145,48 @@ public class GameScreen implements Screen {
 		}, 5f, 20f);
 	}
 
+	/**
+	 * Carga del archivo de guardado en disco la informacion de la partida. las
+	 * posiciones de las paredes y las posiciones de la salida y el jugador
+	 */
 	private void load() {
 		Path savePath = Path.of("data/maze.sav");
-		
+
 		List<String> data = null;
 		try {
 			data = Files.readAllLines(savePath);
-			
+			playerName = data.remove(0);
+
 			String[] teseoData = data.remove(0).split(" ");
 			teseo.x = Float.parseFloat(teseoData[0]);
-			teseo.y =  Float.parseFloat(teseoData[1]);
-			
+			teseo.y = Float.parseFloat(teseoData[1]);
+
 			exit = new Rectangle(0, 0, 64, 64);
 			String[] exitData = data.remove(0).split(" ");
 			exit.x = Float.parseFloat(exitData[0]);
-			exit.y =  Float.parseFloat(exitData[1]);
-			
+			exit.y = Float.parseFloat(exitData[1]);
+
 			data.stream().forEach(line -> {
 				String[] wallData = line.split(" ");
 				float x = Float.parseFloat(wallData[0]);
-				float y =  Float.parseFloat(wallData[1]);
+				float y = Float.parseFloat(wallData[1]);
 				walls.add(new Rectangle(x, y, 64, 64));
 			});
-			
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
 	}
 
+	/**
+	 * Guarda en un archivo la información de la partida
+	 */
 	protected void save() {
 		Path savePath = Path.of("data/maze.sav");
 		String file = "";
+		file += playerName + "\n";
 		file += String.valueOf(teseo.x) + " " + String.valueOf(teseo.y) + "\n";
 		file += String.valueOf(exit.x) + " " + String.valueOf(exit.y) + "\n";
 
@@ -170,12 +201,18 @@ public class GameScreen implements Screen {
 
 	}
 
+	/**
+	 * Carga iterativamente recursos de sonido similares.
+	 */
 	private void loadSteps() {
 		for (int i = 1; i <= 9; i++) {
 			footsteps[i - 1] = Gdx.audio.newSound(Gdx.files.internal("sounds/step_" + i + ".wav"));
 		}
 	}
 
+	/**
+	 * Inicializa y da estilo a los elementos del menu
+	 */
 	private void stageSetup() {
 		stage = new Stage();
 		Gdx.input.setInputProcessor(stage);
@@ -190,6 +227,7 @@ public class GameScreen implements Screen {
 		arrowDown = setArrow("down");
 		arrowLeft = setArrow("left");
 		arrowRight = setArrow("right");
+
 		int aSize = 75;
 		int pad = -10;
 
@@ -228,6 +266,12 @@ public class GameScreen implements Screen {
 		stage.addActor(menu);
 	}
 
+	/**
+	 * inicializa las SwapImage de las flechas segun la direccion
+	 * 
+	 * @param name
+	 * @return
+	 */
 	private SwapImage setArrow(String name) {
 		Texture sprite = new Texture(Gdx.files.internal("sprites/" + name + "Arrow.png"));
 		Texture actSprite = new Texture(Gdx.files.internal("sprites/" + name + "ArrowActive.png"));
@@ -237,27 +281,43 @@ public class GameScreen implements Screen {
 		return arrow;
 	}
 
-	public static Rectangle checkCollision(Rectangle teseo, List<Rectangle> walls, float x, float y) {
-		Rectangle checker = new Rectangle(teseo);
+	/**
+	 * Chequea si un rectangulo dado esta superpuesto con alguno de los rectangulos
+	 * de la lista dada.
+	 * 
+	 * @param r
+	 * @param walls
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static Rectangle checkCollision(Rectangle r, List<Rectangle> walls, float x, float y) {
+		Rectangle checker = new Rectangle(r);
 		Rectangle collision = null;
 		checker.x += x;
 		checker.y += y;
 		try {
-			collision = walls.parallelStream().filter(r -> r.overlaps(checker)).findFirst().get();
+			collision = walls.stream().filter(w -> w.overlaps(checker)).findFirst().get();
 		} catch (NoSuchElementException e) {
 
 		}
-//		 (walls.parallelStream().anyMatch((r) -> r.contains(x, y))) 
 
 		return collision;
 	}
 
+	/**
+	 * Comprueba si el jugador colisionaría con una pared si se desplaza
+	 * verticalmente 'y' unidades
+	 * 
+	 * @param y
+	 * @return
+	 */
 	public Rectangle checkVCollision(float y) {
 		Rectangle checker = new Rectangle(teseo);
 		Rectangle collision = null;
 		checker.y += y;
 		try {
-			collision = walls.parallelStream().filter(r -> r.overlaps(checker)).findFirst().get();
+			collision = walls.stream().filter(r -> r.overlaps(checker)).findFirst().get();
 		} catch (NoSuchElementException e) {
 
 		}
@@ -266,6 +326,13 @@ public class GameScreen implements Screen {
 		return collision;
 	}
 
+	/**
+	 * Comprueba si el jugador colisionaría con una pared si se desplaza
+	 * horizontalmente x unidades
+	 * 
+	 * @param x
+	 * @return
+	 */
 	public Rectangle checkHCollision(float x) {
 		Rectangle checker = new Rectangle(teseo);
 		Rectangle collision = null;
@@ -275,18 +342,25 @@ public class GameScreen implements Screen {
 		} catch (NoSuchElementException e) {
 
 		}
-//		 (walls.parallelStream().anyMatch((r) -> r.contains(x, y))) 
 
 		return collision;
 	}
 
+	/**
+	 * Rellena la lista dada con rectangulos que forman un laberinto completo, y
+	 * devuelve el rectangulo de salida.
+	 * 
+	 * @param walls
+	 * @param x
+	 * @param step
+	 * @return
+	 */
 	public static Rectangle generateLevel(List<Rectangle> walls, int x, int step) {
 		Rectangle exit = null;
 		MazeGenerator level = new MazeGenerator(x, x);
 		int[][] levelMatrix = level.maze;
-//		int[][] levelMatrix = { { 6, 10 }, { 5, 9 } };
+
 		boolean addedExit = false;
-		// level.maze;
 
 		for (int i = 0; i < x; i++) {
 			// draw the north edge
@@ -305,7 +379,7 @@ public class GameScreen implements Screen {
 					walls.add(wallCorner);
 				}
 			}
-//			System.out.println("+");
+
 			// draw the west edge
 			for (int j = 0; j < x; j++) {
 				if ((levelMatrix[j][i] & 8) == 0) {
@@ -314,7 +388,6 @@ public class GameScreen implements Screen {
 					walls.add(wallWest);
 				}
 			}
-//			System.out.println("|");
 
 			// draw the east border
 
@@ -322,11 +395,10 @@ public class GameScreen implements Screen {
 		// draw the bottom line
 		float prob = 0f;
 		for (int j = -1; j < 2 * x; j++) {
-//			System.out.print("+---");
 
 			Rectangle wallEast = new Rectangle((x - 1) * step + 64, -j * step / 2 + 1, 64, 64);
 
-			Rectangle wallSouth = new Rectangle(j * step / 2 - 1, -(x - 1) * step - 64, 64, 64);
+			Rectangle wallSouth = new Rectangle(j * step / 2, -(x - 1) * step - 64, 64, 64);
 			walls.add(wallEast);
 
 			if (!addedExit && Math.random() < prob) {
@@ -342,7 +414,6 @@ public class GameScreen implements Screen {
 		}
 		// open an exit
 
-//		level.display();
 		return exit;
 	}
 
@@ -352,6 +423,9 @@ public class GameScreen implements Screen {
 
 	}
 
+	/**
+	 * Dibuja los objetos del juego y controla la lógica en tiempo real.
+	 */
 	@Override
 	public void render(float delta) {
 		ScreenUtils.clear(250f / 255f, 237f / 255f, 205f / 255f, 1f);
@@ -366,8 +440,7 @@ public class GameScreen implements Screen {
 		batch.end();
 
 		if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			System.out.println(cursor.origin.x);
-			System.out.println(cursor.rect.x);
+
 			paused = !paused;
 			cursor.setCursor(0);
 			toggleMenu();
@@ -391,10 +464,15 @@ public class GameScreen implements Screen {
 
 		if (teseo.overlaps(exit)) {
 			game.setScreen(new WinScreen(game, playerName));
+			this.dispose();
 		}
 
 	}
 
+	/**
+	 * Hace sonar el rugido del minotauro, suena mas fuerte cada vez que se llama al
+	 * metodo
+	 */
 	private void minoRoar() {
 		numroars += 0.05f;
 
@@ -408,12 +486,20 @@ public class GameScreen implements Screen {
 
 	}
 
+	/**
+	 * Muestra o esconde el menu de pausa.
+	 */
 	private void toggleMenu() {
 		menu.setVisible(paused);
 		menuImg.setVisible(paused);
 
 	}
 
+	/**
+	 * Se llama en render, y escucha inputs para determinar el movimiento del
+	 * jugador. Ademas se encarga de que la camara siga al jugador y que suenen los
+	 * sonidos asocioados
+	 */
 	private void movementUpdate() {
 		float nextX = 0;
 		float nextY = 0;
@@ -463,23 +549,35 @@ public class GameScreen implements Screen {
 		camera.position.set(teseo.x, teseo.y, 0);
 
 	}
-
+/**
+ * Mueve (si es posible) al jugador a la posicion X Y dada.
+ * @param nextX
+ * @param nextY
+ */
 	private void moveTeseo(float nextX, float nextY) {
 		moveHor(nextX);
 		moveVer(nextY);
 	}
-
+/**
+ * Mueve horizontalmente al jugador, tiene en cuenta posibles colisiones
+ * @param nextX
+ */
 	public void moveHor(float nextX) {
 		Rectangle hCollider = checkHCollision(nextX);
 
 		if (hCollider == null) {
+
 			teseo.x += nextX;
 		} else if (checkHCollision(nextX / nextX * Gdx.graphics.getDeltaTime()) == null) {
+
 			moveHor(nextX / 5);
 		}
 
 	}
-
+/**
+ * Mueve verticalmente al jugador
+ * @param nextY
+ */
 	public void moveVer(float nextY) {
 
 		Rectangle vCollider = checkVCollision(nextY);
